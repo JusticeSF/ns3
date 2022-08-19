@@ -13,6 +13,7 @@
 #include "ns3/yans-wifi-helper.h"
 #include "ns3/ssid.h"
 #include "ns3/mobility-helper.h"
+#include "ns3/point-to-point-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/internet-stack-helper.h"
 #include "ns3/ipv4-address-helper.h"
@@ -40,7 +41,7 @@ void PrintStats (UdpServerHelper *server)
   f.open ("testac_123123123123.txt", std::fstream::out | std::fstream::app);
   f << cur << std::endl;
   f.close();
-  std::cout << "total packets = \t" << cur << std::endl;
+  std::cout << "total packets = \t" << cur <<std::endl;
 }
 
 void SetNodePosition (Ptr<Node> node, Vector pos)
@@ -55,8 +56,8 @@ int main (int argc, char *argv[])
   bool udp = true;
   bool useRts = true;
   double simulationTime = 600; //seconds
-  double distance = 86.7; //meters
-  double dbn = 5.0; //meters
+  double distance = 10.0; //meters
+  double dbn = 10.0; //meters
   int mcs = -1; // -1 indicates an unset value
   double dbs = 5.0; //meters
 
@@ -189,7 +190,7 @@ int main (int argc, char *argv[])
               positionAlloc->Add (Vector (0.0, 0.0, 0.0));
 
              // positionAlloc->Add (Vector (distance, 0.0, 0.0));
-              positionAlloc->Add (Vector (40.0, 0.0, 0.0)); //relay 40.0 for 160MHz, 58.0 for 80MHz, 80.0 for 160MHz
+              positionAlloc->Add (Vector (58.0, 0.0, 0.0)); //relay 40.0 for 160MHz, 58.0 for 80MHz, 80.0 for 160MHz
 
               mobility.SetPositionAllocator (positionAlloc);
 
@@ -200,7 +201,7 @@ int main (int argc, char *argv[])
                   mobility.Install (wifiStaNode.Get(f));
                 }
 
-              
+
               MobilityHelper stationMobilityHelper;
               Ptr<ListPositionAllocator> stationPositionAlloc = CreateObject<ListPositionAllocator>();
               stationPositionAlloc -> Add(Vector(10.0, 0.0, 0.0)); //it is the starting position
@@ -209,10 +210,10 @@ int main (int argc, char *argv[])
               stationMobilityHelper.SetMobilityModel("ns3::ConstantVelocityMobilityModel");
               stationMobilityHelper.Install(receiver);
               (receiver.Get(0) -> GetObject<ConstantVelocityMobilityModel>()) -> SetVelocity(Vector(4.0, 0.0, 0.0));
-              
+
               OlsrHelper olsr;
               Ipv4StaticRoutingHelper staticRouting;
-              olsr.Set("HelloInterval", TimeValue (Seconds(0.1)));
+              olsr.Set("HelloInterval", TimeValue (Seconds(0.5)));
               //olsr.Set("TcInterval", TimeValue (Seconds(2)));
               //olsr.Set("MidInterval", TimeValue (Seconds(2)));
               //olsr.Set("HnaInterval", TimeValue (Seconds(2)));
@@ -220,7 +221,7 @@ int main (int argc, char *argv[])
 
               Ipv4ListRoutingHelper list;
               list.Add (staticRouting, 0);
-              list.Add (olsr, 1);
+              list.Add (olsr, 10);
 
               /* Internet stack*/
               InternetStackHelper stack;
@@ -266,48 +267,16 @@ int main (int argc, char *argv[])
                       client.SetAttribute ("Interval", TimeValue (Time ("0.001"))); //packets/s
                       client.SetAttribute ("PacketSize", UintegerValue (payloadSize));
                       ApplicationContainer clientApp = client.Install (receiver.Get (0));
-                      clientApp.Start (Seconds (10.0));
-                      Simulator::Schedule (Seconds (11.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (12.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (13.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (14.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (15.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (16.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (17.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (18.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (19.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (20.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (21.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (22.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (22.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (23.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (24.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (25.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (26.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (27.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (28.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (29.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (30.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (31.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (32.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (33.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (34.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (35.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (36.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (37.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (38.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (39.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (40.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (41.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (42.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (43.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (44.0), &PrintStats, &server);
-                      Simulator::Schedule (Seconds (45.0), &PrintStats, &server);
+                      clientApp.Start (Seconds (10.0));//packet sends after 50m
 
-
+                      for (int gr = 5; gr<=30; gr++)
+                        {
+                          Simulator::Schedule (Seconds (gr), &PrintStats, &server);
+                        }
 
                       clientApp.Stop (Seconds (simulationTime + 1));
                     }
+
 
 
                   serverApp.Start (Seconds (0.0));
@@ -315,6 +284,7 @@ int main (int argc, char *argv[])
 
               //Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
               AnimationInterface animationInterface (std::string ("home40.anim"));
+              //phy.EnablePcapAll ("second58");
               Simulator::Stop (Seconds (simulationTime + 10));
               Simulator::Run ();
 
